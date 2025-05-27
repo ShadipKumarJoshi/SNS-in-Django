@@ -243,7 +243,7 @@
                                         class="bg-gray-200 border border-white rounded-full w-8 h-8">
                                 </div>
                             </a>
-                            <span class="block capitalize font-semibold "> @{{post.user}} </span>
+                            <span class="block capitalize font-semibold "> <a href="#"> @{{post.user}}</a> </span>
                         </div>
                         <div>
                             <a href="#"> <i
@@ -253,7 +253,7 @@
                                 uk-drop="mode: hover;pos: top-right">
 
                                 <ul class="space-y-1">
-                                    <li>
+                                    <!-- <li>
                                         <a href="#"
                                             class="flex items-center px-3 py-2 hover:bg-gray-200 hover:text-gray-800 rounded-md ">
                                             <i class="uil-share-alt mr-1"></i> Share
@@ -279,7 +279,7 @@
                                     </li>
                                     <li>
                                         <hr class="-mx-2 my-2 ">
-                                    </li>
+                                    </li> -->
                                     <li>
                                         <a href="#"
                                             class="flex items-center px-3 py-2 text-red-500 hover:bg-red-100 hover:text-red-500 rounded-md ">
@@ -312,7 +312,7 @@
                                 </div>
 
                             </a>
-                            <a href="#" class="flex items-center space-x-2">
+                            <!-- <a href="#" class="flex items-center space-x-2">
                                 <div class="p-2 rounded-full text-black">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
                                         width="25" height="25" class="">
@@ -322,7 +322,7 @@
                                     </svg>
                                 </div>
 
-                            </a>
+                            </a> -->
                             <a href="#" class="flex items-center space-x-2 flex-1 justify-end">
                                 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
                                     aria-hidden="true" role="img" width="25" height="25"
@@ -335,21 +335,12 @@
 
                             </a>
                         </div>
-                        <div class="flex items-center space-x-3">
-                            <div class="flex items-center">
-                                <img src="{% static 'assets/images/avatars/avatar-1.jpg' %}" alt=""
-                                    class="w-6 h-6 rounded-full border-2 border-white ">
-                                <img src="{% static 'assets/images/avatars/avatar-4.jpg' %}" alt=""
-                                    class="w-6 h-6 rounded-full border-2 border-white  -ml-2">
-                                <img src="{% static 'assets/images/avatars/avatar-2.jpg' %}" alt=""
-                                    class="w-6 h-6 rounded-full border-2 border-white  -ml-2">
-                            </div>
-                            <div class="">
-                                Liked <strong> taiye</strong> and <strong> 209 Others </strong>
-                            </div>
-                        </div>
+                        -->
+                        <p>
+                            <a href="#"><strong>{{post.user}}</strong> </a>{{post.caption}}
+                        </p>
 
-                        <div class="border-t pt-4 space-y-4 ">
+                        <!-- <div class="border-t pt-4 space-y-4 ">
                             <div class="flex">
                                 <div class="w-10 h-10 rounded-full relative flex-shrink-0">
                                     <img src="{% static 'assets/images/avatars/avatar-1.jpg' %}" alt=""
@@ -374,15 +365,15 @@
                                     <div class="absolute w-3 h-3 top-3 -left-1 bg-gray-100 transform rotate-45 "></div>
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
 
-                        <div class="bg-gray-100 bg-gray-100 rounded-full rounded-md relative ">
+                        <!-- <div class="bg-gray-100 bg-gray-100 rounded-full rounded-md relative ">
                             <input type="text" placeholder="post a comment" class="bg-transparent max-h-10 shadow-none">
                             <div class="absolute bottom-0 flex h-full items-center right-0 right-3 text-xl space-x-2">
                                 <a href="#"> <i class="uil-image"></i></a>
                                 <a href="#"> <i class="uil-video"></i></a>
                             </div>
-                        </div>
+                        </div> -->
 
                     </div>
 
