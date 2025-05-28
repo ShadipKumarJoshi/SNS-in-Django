@@ -15,4 +15,7 @@ urlpatterns = [
     #posts
     path('upload', views.upload, name='upload'),
     
+    #like-post
+    path('like-post', views.like_post, name='like-post'),
+    
 ]
