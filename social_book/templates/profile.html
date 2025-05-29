@@ -16,6 +16,7 @@
 	<link rel="stylesheet" href="{% static 'css/style.css' %}">
 	<link rel="stylesheet" href="{% static 'css/color.css' %}">
 	<link rel="stylesheet" href="{% static 'css/responsive.css' %}">
+	<link href="https://cdn.jsdelivr.net/npm/lightbox2@2/dist/css/lightbox.min.css" rel="stylesheet">
 
 </head>
 
@@ -128,15 +129,27 @@
 							<div class="col-lg-6">
 								<div class="central-meta">
 									<ul class="photos">
-										 
+
+										<!-- post previewed on right on click  -->
+
+										<!-- {% for post in user_posts %}
+										<li>
+											<a class="strip" href="{{post.image.url}}" title=""
+												data-strip-group="mygroup" data-strip-group-options="loop: false">
+												<img src="{{post.image.url}}" style="height: 250px; width: 300px;"
+													alt=""></a>
+										</li>
+										{% endfor %} -->
+
+
+										<!-- post previewd centerd on click -->
 										{% for post in user_posts %}
 										<li>
-											<a class="strip"
-												href="{{post.image.url}}"
-												title="" data-strip-group="mygroup"
-												data-strip-group-options="loop: false">
-												<img src="{{post.image.url}}"
-													style="height: 250px; width: 300px;" alt=""></a>
+											<a href="{{ post.image.url }}" data-lightbox="user-posts"
+												data-title="Post by {{ user_profile.user.username }}">
+												<img src="{{ post.image.url }}" style="height: 250px; width: 300px;"
+													alt="">
+											</a>
 										</li>
 										{% endfor %}
 
@@ -162,8 +175,11 @@
 
 	<script data-cfasync="false"
 		src="{% static '../../cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js' %}"></script>
-	<script src="{% static 'js/main.min.js' %"></script>
+	<script src="{% static 'js/main.min.js' %}"></script>
 	<script src="{% static 'js/script.js' %}"></script>
+
+	<script src="https://cdn.jsdelivr.net/npm/lightbox2@2/dist/js/lightbox.min.js"></script>
+
 
 </body>
 
