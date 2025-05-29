@@ -15,6 +15,9 @@ urlpatterns = [
     #profile
     path('profile/<str:pk>', views.profile, name='profile'),
     
+    #follow
+    path('follow', views.follow, name='follow'),
+        
     #posts
     path('upload', views.upload, name='upload'),
     
