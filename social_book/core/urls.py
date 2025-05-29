@@ -12,6 +12,9 @@ urlpatterns = [
     path('logout', views.logout, name='logout'),
     path('settings', views.settings, name='settings'),
     
+    #profile
+    path('profile/<str:pk>', views.profile, name='profile'),
+    
     #posts
     path('upload', views.upload, name='upload'),
     
