@@ -17,6 +17,9 @@ urlpatterns = [
     
     #follow
     path('follow', views.follow, name='follow'),
+    
+    #search
+    path('search', views.search, name='search'),
         
     #posts
     path('upload', views.upload, name='upload'),
