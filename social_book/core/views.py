@@ -25,6 +25,9 @@ def index(request):
         
     feed_list = list(chain(*feed))
     
+    for post in feed_list:
+        post.user_profile = Profile.objects.get(user__username=post.user)
+    
     posts = Post.objects.all()
     return render(request, 'index.html', {'user_profile': user_profile, 'posts' : feed_list})
 
