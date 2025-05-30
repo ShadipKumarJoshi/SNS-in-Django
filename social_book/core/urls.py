@@ -23,6 +23,7 @@ urlpatterns = [
         
     #posts
     path('upload', views.upload, name='upload'),
+    path('delete-post/<int:post_id>/', views.delete_post, name='delete-post'),
     
     #like-post
     path('like-post', views.like_post, name='like-post'),

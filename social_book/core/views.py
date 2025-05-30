@@ -19,13 +19,20 @@ def index(request):
     user_following = FollowersCount.objects.filter(follower=request.user.username)
     for users in user_following:
         user_following_list.append(users.user)
-        
+    
+    # Fetch posts of followed users    
     for usernames in user_following_list:
         feed_lists = Post.objects.filter(user=usernames)
         feed.append(feed_lists)
-        
+    
+    # Add the logged-in user's own posts
+    my_posts = Post.objects.filter(user=request.user.username)
+    feed.append(my_posts)
+    
+    # Merge all post querysets into a single list    
     feed_list = list(chain(*feed))
     
+    # Enrich posts with profile and comments
     for post in feed_list:
         post.user_profile = Profile.objects.get(user__username=post.user)
     
@@ -218,6 +225,16 @@ def upload(request):
     else:
         return redirect('/')
     return HttpResponse('<h1> UPload View </h1>')
+
+@login_required
+def delete_post(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+
+    # Allow only the owner to delete the post
+    if post.user == request.user:
+        post.delete()
+        
+    return redirect('/') 
 
 
 # LIKEs
