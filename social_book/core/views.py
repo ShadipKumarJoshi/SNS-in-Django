@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User, auth
 from django.contrib import messages
-from .models import Profile, Post, LikePost, FollowersCount
+from .models import Profile, Post, LikePost, FollowersCount, Comment
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from itertools import chain
@@ -29,6 +29,12 @@ def index(request):
     for post in feed_list:
         post.user_profile = Profile.objects.get(user__username=post.user)
     
+        post.comments = Comment.objects.filter(post=post).order_by('-created_at')
+
+        # Attach commenter profile to each comment
+        for comment in post.comments:
+            comment.profile = Profile.objects.get(user=comment.user)
+        
     # user suggestion starts
     all_users = User.objects.all()
     user_following_all = []
@@ -92,8 +98,7 @@ def signup(request):
         return render(request, 'signup.html')
 
 def signin(request):
-    
-    
+       
     if request.method == "POST":
         username = request.POST['username']
         password = request.POST['password']
@@ -238,7 +243,23 @@ def like_post(request):
         post.save()
         return redirect('/')
         
-        
+# COMMENTS
+@login_required(login_url='signin')
+def add_comment(request):
+    if request.method == 'POST':
+        post_id = request.POST.get('post_id')
+        comment_text = request.POST.get('comment_text')
+        user = request.user
+
+        post = Post.objects.get(id=post_id)
+
+        new_comment = Comment.objects.create(post=post, user=user, comment_text=comment_text)
+        new_comment.save()
+
+        return redirect('/')
+    else:
+        return redirect('/')
+       
 # SEARCH
 @login_required(login_url='signin')
 def search(request):

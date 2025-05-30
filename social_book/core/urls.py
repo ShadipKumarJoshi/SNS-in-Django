@@ -27,4 +27,7 @@ urlpatterns = [
     #like-post
     path('like-post', views.like_post, name='like-post'),
     
+    # Comments
+    path('add-comment', views.add_comment, name='add-comment'),
+
 ]
