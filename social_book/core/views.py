@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.models import User, auth
 from django.contrib import messages
 from .models import Profile, Post, LikePost, FollowersCount, Comment
@@ -259,6 +259,27 @@ def add_comment(request):
         return redirect('/')
     else:
         return redirect('/')
+    
+@login_required(login_url='signin')
+def delete_comment(request, comment_id):
+    comment = get_object_or_404(Comment, id=comment_id)
+    if comment.user == request.user:
+        comment.delete()
+    return redirect('/')
+
+@login_required(login_url='signin')
+def edit_comment(request, comment_id):
+    comment = get_object_or_404(Comment, id=comment_id)
+    if comment.user != request.user:
+        return redirect('/')
+
+    if request.method == 'POST':
+        new_text = request.POST.get('comment_text')
+        comment.comment_text = new_text
+        comment.save()
+    return redirect('/')
+
+
        
 # SEARCH
 @login_required(login_url='signin')

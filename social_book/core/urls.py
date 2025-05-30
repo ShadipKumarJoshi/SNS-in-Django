@@ -29,5 +29,8 @@ urlpatterns = [
     
     # Comments
     path('add-comment', views.add_comment, name='add-comment'),
+    path('delete-comment/<int:comment_id>/', views.delete_comment, name='delete-comment'),
+    path('edit-comment/<int:comment_id>/', views.edit_comment, name='edit-comment'),
+
 
 ]
