@@ -144,7 +144,8 @@ def settings(request):
             cover_image = user_profile.coverimg
 
         # Get text fields
-        bio = request.POST.get('bio', user_profile.bio)
+        bio = request.POST.get('bio', user_profile.bio) # means value = some_dict.get('key', 'default_value')
+
         location = request.POST.get('location', user_profile.location)
 
         # Update profile
