@@ -130,25 +130,39 @@ def logout(request):
 
 @login_required(login_url='signin')
 def settings(request):
-    user_profile = Profile.objects.get(user=request.user)
+    user_profile = Profile.objects.get(user=request.user) #Profile has a OneToOne relationship with the Django User model.
     
     if request.method == 'POST':
     
         if request.FILES.get('image') == None:
             image = user_profile.profileimg  # Keep the existing image
+            cover_image = request.FILES.get('coverimg')
             bio = request.POST['bio']
             location = request.POST['location']
             
             user_profile.profileimg = image
+            user_profile.coverimg = cover_image
             user_profile.bio = bio
             user_profile.location = location
             user_profile.save()
         else:
             image = request.FILES.get('image')
+            cover_image = request.FILES.get('coverimg')
+
             bio = request.POST['bio']
             location = request.POST['location']
             
+             # Fallback to current image if new one not uploaded
+            if image is None:
+                image = user_profile.profileimg
+
+            if cover_image is None:
+                cover_image = user_profile.coverimg
+
+            # Update profile
+            
             user_profile.profileimg = image # Use the uploaded image
+            user_profile.coverimg = cover_image
             user_profile.bio = bio
             user_profile.location = location
             user_profile.save()
