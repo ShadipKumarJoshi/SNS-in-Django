@@ -130,45 +130,32 @@ def logout(request):
 
 @login_required(login_url='signin')
 def settings(request):
-    user_profile = Profile.objects.get(user=request.user) #Profile has a OneToOne relationship with the Django User model.
-    
+    user_profile = Profile.objects.get(user=request.user)  # Profile has a OneToOne relationship with User
+
     if request.method == 'POST':
-    
-        if request.FILES.get('image') == None:
-            image = user_profile.profileimg  # Keep the existing image
-            cover_image = request.FILES.get('coverimg')
-            bio = request.POST['bio']
-            location = request.POST['location']
-            
-            user_profile.profileimg = image
-            user_profile.coverimg = cover_image
-            user_profile.bio = bio
-            user_profile.location = location
-            user_profile.save()
-        else:
-            image = request.FILES.get('image')
-            cover_image = request.FILES.get('coverimg')
+        # Get uploaded files or fallback to current ones
+        image = request.FILES.get('image')
+        cover_image = request.FILES.get('coverimg')
 
-            bio = request.POST['bio']
-            location = request.POST['location']
-            
-             # Fallback to current image if new one not uploaded
-            if image is None:
-                image = user_profile.profileimg
+        if image is None:
+            image = user_profile.profileimg
 
-            if cover_image is None:
-                cover_image = user_profile.coverimg
+        if cover_image is None:
+            cover_image = user_profile.coverimg
 
-            # Update profile
-            
-            user_profile.profileimg = image # Use the uploaded image
-            user_profile.coverimg = cover_image
-            user_profile.bio = bio
-            user_profile.location = location
-            user_profile.save()
-            
+        # Get text fields
+        bio = request.POST.get('bio', user_profile.bio)
+        location = request.POST.get('location', user_profile.location)
+
+        # Update profile
+        user_profile.profileimg = image
+        user_profile.coverimg = cover_image
+        user_profile.bio = bio
+        user_profile.location = location
+        user_profile.save()
+
         return redirect('settings')
-        
+
     return render(request, 'setting.html', {'user_profile': user_profile})
 
 # PROFILE
