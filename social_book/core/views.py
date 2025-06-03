@@ -1,7 +1,7 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.models import User, auth
 from django.contrib import messages
-from .models import Profile, Post, LikePost, FollowersCount
+from .models import Profile, Post, LikePost, FollowersCount, Comment
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from itertools import chain
@@ -19,16 +19,29 @@ def index(request):
     user_following = FollowersCount.objects.filter(follower=request.user.username)
     for users in user_following:
         user_following_list.append(users.user)
-        
+    
+    # Fetch posts of followed users    
     for usernames in user_following_list:
         feed_lists = Post.objects.filter(user=usernames)
         feed.append(feed_lists)
-        
+    
+    # Add the logged-in user's own posts
+    my_posts = Post.objects.filter(user=request.user.username)
+    feed.append(my_posts)
+    
+    # Merge all post querysets into a single list    
     feed_list = list(chain(*feed))
     
+    # Enrich posts with profile and comments
     for post in feed_list:
         post.user_profile = Profile.objects.get(user__username=post.user)
     
+        post.comments = Comment.objects.filter(post=post).order_by('-created_at')
+
+        # Attach commenter profile to each comment
+        for comment in post.comments:
+            comment.profile = Profile.objects.get(user=comment.user)
+        
     # user suggestion starts
     all_users = User.objects.all()
     user_following_all = []
@@ -92,8 +105,7 @@ def signup(request):
         return render(request, 'signup.html')
 
 def signin(request):
-    
-    
+       
     if request.method == "POST":
         username = request.POST['username']
         password = request.POST['password']
@@ -118,31 +130,33 @@ def logout(request):
 
 @login_required(login_url='signin')
 def settings(request):
-    user_profile = Profile.objects.get(user=request.user)
-    
+    user_profile = Profile.objects.get(user=request.user)  # Profile has a OneToOne relationship with User
+
     if request.method == 'POST':
-    
-        if request.FILES.get('image') == None:
-            image = user_profile.profileimg  # Keep the existing image
-            bio = request.POST['bio']
-            location = request.POST['location']
-            
-            user_profile.profileimg = image
-            user_profile.bio = bio
-            user_profile.location = location
-            user_profile.save()
-        else:
-            image = request.FILES.get('image')
-            bio = request.POST['bio']
-            location = request.POST['location']
-            
-            user_profile.profileimg = image # Use the uploaded image
-            user_profile.bio = bio
-            user_profile.location = location
-            user_profile.save()
-            
+        # Get uploaded files or fallback to current ones
+        image = request.FILES.get('image')
+        cover_image = request.FILES.get('coverimg')
+
+        if image is None:
+            image = user_profile.profileimg
+
+        if cover_image is None:
+            cover_image = user_profile.coverimg
+
+        # Get text fields
+        bio = request.POST.get('bio', user_profile.bio) # means value = some_dict.get('key', 'default_value')
+
+        location = request.POST.get('location', user_profile.location)
+
+        # Update profile
+        user_profile.profileimg = image
+        user_profile.coverimg = cover_image
+        user_profile.bio = bio
+        user_profile.location = location
+        user_profile.save()
+
         return redirect('settings')
-        
+
     return render(request, 'setting.html', {'user_profile': user_profile})
 
 # PROFILE
@@ -214,6 +228,16 @@ def upload(request):
         return redirect('/')
     return HttpResponse('<h1> UPload View </h1>')
 
+@login_required
+def delete_post(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+
+    # Allow only the owner to delete the post
+    if post.user == request.user:
+        post.delete()
+        
+    return redirect('/') 
+
 
 # LIKEs
 
@@ -238,7 +262,44 @@ def like_post(request):
         post.save()
         return redirect('/')
         
-        
+# COMMENTS
+@login_required(login_url='signin')
+def add_comment(request):
+    if request.method == 'POST':
+        post_id = request.POST.get('post_id')
+        comment_text = request.POST.get('comment_text')
+        user = request.user
+
+        post = Post.objects.get(id=post_id)
+
+        new_comment = Comment.objects.create(post=post, user=user, comment_text=comment_text)
+        new_comment.save()
+
+        return redirect('/')
+    else:
+        return redirect('/')
+    
+@login_required(login_url='signin')
+def delete_comment(request, comment_id):
+    comment = get_object_or_404(Comment, id=comment_id)
+    if comment.user == request.user:
+        comment.delete()
+    return redirect('/')
+
+@login_required(login_url='signin')
+def edit_comment(request, comment_id):
+    comment = get_object_or_404(Comment, id=comment_id)
+    if comment.user != request.user:
+        return redirect('/')
+
+    if request.method == 'POST':
+        new_text = request.POST.get('comment_text')
+        comment.comment_text = new_text
+        comment.save()
+    return redirect('/')
+
+
+       
 # SEARCH
 @login_required(login_url='signin')
 def search(request):

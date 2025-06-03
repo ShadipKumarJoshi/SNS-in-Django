@@ -10,6 +10,7 @@ class Profile(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     id_user = models.IntegerField()
     bio = models.TextField(blank=True)
+    coverimg = models.ImageField(upload_to='cover_images', default='cover-picture.jpg')
     profileimg = models.ImageField(upload_to='profile_images', default='blank-profile-picture.png')
     location = models.CharField(max_length=100, blank=True)
     
@@ -17,7 +18,7 @@ class Profile(models.Model):
         return self.user.username
     
 class Post(models.Model):
-    id =models.UUIDField(primary_key=True, default=uuid.uuid4)
+    id =models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False) # defines a unique, non-editable primary key using a randomly generated UUID instead of Django’s default auto-incrementing ID. also Prevents manual editing in admin
     user = models.CharField(max_length=100)
     image = models.ImageField(upload_to='post_images')
     caption = models.TextField()
@@ -25,7 +26,7 @@ class Post(models.Model):
     no_of_likes = models.IntegerField(default=0)
     
     def __str__(self):
-        return self.user
+        return f"{self.user.username}'s Post"
     
 class LikePost(models.Model):
     post_id = models.CharField(max_length=500)
@@ -33,6 +34,16 @@ class LikePost(models.Model):
     
     def __str__(self):
         return self.username
+
+class Comment(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    comment_text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.user.username} on {self.post.id}'
+
     
 class FollowersCount(models.Model):
     follower = models.CharField(max_length=100)
@@ -40,4 +51,5 @@ class FollowersCount(models.Model):
     
     def __str__(self):
         return self.user
+
     
