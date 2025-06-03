@@ -57,6 +57,7 @@ class LikePost(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE)  # Links like to a real Post object
     user = models.ForeignKey(User, on_delete=models.CASCADE)  # Links like to a real User object
 
+        # A user can only like the same post once.
     class Meta:
         unique_together = ('post', 'user')  # Prevents duplicate likes
 
@@ -81,6 +82,7 @@ class Comment(models.Model):
 #     user = models.CharField(max_length=100)
     
 class FollowersCount(models.Model):
+   # follower: the person who follows.// user: the person being followed. // related_name helps with reverse lookups. Example:
     follower = models.ForeignKey(User, related_name='following', on_delete=models.CASCADE)  # Link to User following others
     user = models.ForeignKey(User, related_name='followers', on_delete=models.CASCADE)      # Link to User being followed
 
