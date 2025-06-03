@@ -101,36 +101,76 @@ def index(request):
 
 def signup(request):
     if request.method == "POST":
-        username = request.POST['username'] 
-        email = request.POST['email'] 
-        password = request.POST['password'] 
-        password2 = request.POST['password2']  
+        # ❌ OLD: No check for empty or invalid inputs
+        # username = request.POST['username'] 
+        # email = request.POST['email'] 
+        # password = request.POST['password'] 
+        # password2 = request.POST['password2'] 
+         
+        # ✅ NEW: Handles missing fields and trims whitespace
+        username = request.POST.get('username', '').strip()
+        email = request.POST.get('email', '').strip()
+        password = request.POST.get('password', '')
+        password2 = request.POST.get('password2', '')
         
-        if password == password2:
-            if User.objects.filter(email=email).exists():
-                messages.info(request, 'Email is already registered!')
-                return redirect('signup')
-            elif User.objects.filter(username=username).exists():
-                messages.info(request, 'Username is already registered!')
-                return redirect('signup')
-            else:
-                user = User.objects.create_user(username=username, email=email, password=password)
-                user.save()
-                
-                #Log user in and redirect to settings page
-                user_login = auth.authenticate(username=username, password=password)
-                auth.login(request, user_login)
-                
-                
-                #create a Profile page for new user
-                user_model = User.objects.get(username=username)
-                # new_profile = Profile.objects.create(user=user_model, id_user= user_model.id)
-                new_profile = Profile.objects.create(user=user_model)  # id_user no longer exists
-                new_profile.save()
-                return redirect('settings')
-        else:  
-            messages.info(request, 'Passwords donnot match!')
+         # ✅ NEW: Check for empty fields
+        if not username or not email or not password or not password2:
+            messages.error(request, 'All fields are required.')
             return redirect('signup')
+
+        # ✅ NEW: Enforce password strength
+        if len(password) < 6:
+            messages.error(request, 'Password must be at least 6 characters long.')
+            return redirect('signup')
+        
+        # ❌ OLD: Only compared passwords without any other validation
+        # if password == password2:
+        #     if User.objects.filter(email=email).exists():
+        #         messages.info(request, 'Email is already registered!')
+        #         return redirect('signup')
+        #     elif User.objects.filter(username=username).exists():
+        #         messages.info(request, 'Username is already registered!')
+        #         return redirect('signup')
+        #     else:
+        #         user = User.objects.create_user(username=username, email=email, password=password)
+        #         user.save()
+                
+        #         #Log user in and redirect to settings page
+        #         user_login = auth.authenticate(username=username, password=password)
+        #         auth.login(request, user_login)
+                
+                
+        #         #create a Profile page for new user
+        #         user_model = User.objects.get(username=username)
+        #         # new_profile = Profile.objects.create(user=user_model, id_user= user_model.id)
+        #         new_profile = Profile.objects.create(user=user_model)  # id_user no longer exists
+        #         new_profile.save()
+        #         return redirect('settings')
+        # else:  
+        #     messages.info(request, 'Passwords donnot match!')
+        #     return redirect('signup')
+        
+         # ✅ NEW: Validate password match
+        if password != password2:
+            messages.error(request, 'Passwords do not match!')
+            return redirect('signup')
+
+        # ✅ NEW: Check for existing email
+        if User.objects.filter(email=email).exists():
+            messages.error(request, 'Email is already registered!')
+            return redirect('signup')
+
+        # ✅ NEW: Check for existing username
+        if User.objects.filter(username=username).exists():
+            messages.error(request, 'Username is already registered!')
+            return redirect('signup')
+
+        # ✅ NEW: Create and login user, create profile
+        user = User.objects.create_user(username=username, email=email, password=password)
+        user.save()
+        auth.login(request, user)
+        Profile.objects.get_or_create(user=user)
+        return redirect('settings')
     else:
         return render(request, 'signup.html')
 
