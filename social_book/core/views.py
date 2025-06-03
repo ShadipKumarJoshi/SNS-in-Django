@@ -113,15 +113,21 @@ def signup(request):
         password = request.POST.get('password', '')
         password2 = request.POST.get('password2', '')
         
+         # ✅ Prepare context for re-rendering the form with input preserved
+        context = {
+            'username': username,
+            'email': email
+        }
+        
          # ✅ NEW: Check for empty fields
         if not username or not email or not password or not password2:
             messages.error(request, 'All fields are required.')
-            return redirect('signup')
+            return render(request, 'signup.html', context)
 
         # ✅ NEW: Enforce password strength
         if len(password) < 6:
             messages.error(request, 'Password must be at least 6 characters long.')
-            return redirect('signup')
+            return render(request, 'signup.html', context)
         
         # ❌ OLD: Only compared passwords without any other validation
         # if password == password2:
@@ -153,17 +159,17 @@ def signup(request):
          # ✅ NEW: Validate password match
         if password != password2:
             messages.error(request, 'Passwords do not match!')
-            return redirect('signup')
+            return render(request, 'signup.html', context)
 
         # ✅ NEW: Check for existing email
         if User.objects.filter(email=email).exists():
             messages.error(request, 'Email is already registered!')
-            return redirect('signup')
+            return render(request, 'signup.html', context)
 
         # ✅ NEW: Check for existing username
         if User.objects.filter(username=username).exists():
             messages.error(request, 'Username is already registered!')
-            return redirect('signup')
+            return render(request, 'signup.html', context)
 
         # ✅ NEW: Create and login user, create profile
         user = User.objects.create_user(username=username, email=email, password=password)
@@ -177,8 +183,8 @@ def signup(request):
 def signin(request):
        
     if request.method == "POST":
-        username = request.POST['username']
-        password = request.POST['password']
+        username = request.POST.get('username', '').strip()
+        password = request.POST.get('password', '')
         
         user = auth.authenticate(username=username, password=password)
         
@@ -187,7 +193,10 @@ def signin(request):
             return redirect('/')
         else:
             messages.info(request, ' Invalid credentials!')
-            return redirect('signin')
+            # return redirect('signin')
+            # ✅ preserve username in context
+            context = {'username': username}
+            return render(request, 'signin.html', context)
             
     
     else:
