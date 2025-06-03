@@ -7,16 +7,24 @@ from django.contrib.auth.decorators import login_required
 from itertools import chain
 import random
 
+# HOME FEED
 # Create your views here.
 @login_required(login_url='signin')
 def index(request):
     user_object = User.objects.get(username=request.user.username)
-    user_profile = Profile.objects.get(user=user_object)
+    # user_profile = Profile.objects.get(user=user_object)
+    user_profile, _ = Profile.objects.get_or_create(user=user_object)  # ✅ creates profile if needed
+
     
+    # Get usernames the user follows
     user_following_list =[]
     feed = []
     
-    user_following = FollowersCount.objects.filter(follower=request.user.username)
+    # ❌ OLD: used username string comparison
+    # user_following = FollowersCount.objects.filter(follower=request.user.username)
+    # ✅ NEW: use ForeignKey comparison
+    user_following = FollowersCount.objects.filter(follower=request.user)
+
     for users in user_following:
         user_following_list.append(users.user)
     
@@ -26,7 +34,10 @@ def index(request):
         feed.append(feed_lists)
     
     # Add the logged-in user's own posts
-    my_posts = Post.objects.filter(user=request.user.username)
+    # ❌ OLD: used username string for filtering posts
+    # my_posts = Post.objects.filter(user=request.user.username)
+    # ✅ NEW: filter with ForeignKey `User` object
+    my_posts = Post.objects.filter(user=request.user)
     feed.append(my_posts)
     
     # Merge all post querysets into a single list    
@@ -34,38 +45,56 @@ def index(request):
     
     # Enrich posts with profile and comments
     for post in feed_list:
-        post.user_profile = Profile.objects.get(user__username=post.user)
-    
+        # ❌ OLD: was getting Profile with user__username, now unnecessary
+        # post.user_profile = Profile.objects.get(user__username=post.user)
+        # ✅ NEW: simpler lookup with ForeignKey directly
+        # post.user_profile = Profile.objects.get(user=post.user)
+        post.user_profile, _ = Profile.objects.get_or_create(user=post.user)  # ✅ creates profile if missing
+
+        
         post.comments = Comment.objects.filter(post=post).order_by('-created_at')
 
         # Attach commenter profile to each comment
         for comment in post.comments:
-            comment.profile = Profile.objects.get(user=comment.user)
+            # comment.profile = Profile.objects.get(user=comment.user)
+            comment.profile, _ = Profile.objects.get_or_create(user=comment.user)
+
         
     # user suggestion starts
-    all_users = User.objects.all()
+    # all_users = User.objects.all()    #showing admin after code enhance
+    all_users = User.objects.filter(is_superuser=False, is_staff=False)
+
     user_following_all = []
     
     for user in user_following:
-        user_list =User.objects.get(username =user.user)
+        # user_list =User.objects.get(username =user.user)
+        user_list = user.user
         user_following_all.append(user_list)
     
     new_suggestions_list = [x for x in list(all_users) if (x not in list(user_following_all))]
-    current_user = User.objects.filter(username=request.user.username)
-    final_suggestions_list = [x for x in list(new_suggestions_list) if (x not in list(current_user))]
+    # current_user = User.objects.filter(username=request.user.username)
+    # final_suggestions_list = [x for x in list(new_suggestions_list) if (x not in list(current_user))]
+    final_suggestions_list = [x for x in new_suggestions_list if x != request.user]
     random.shuffle(final_suggestions_list)
     
-    username_profile = []
-    username_profile_list =[]
+    # ❌ OLD: used id_user, which no longer exists
+    # username_profile = []
+    # username_profile_list =[]
     
-    for users in final_suggestions_list:
-        username_profile.append(users.id)
+    # for users in final_suggestions_list:
+    #     username_profile.append(users.id)
         
-    for ids in username_profile:
-        profile_lists =Profile.objects.filter(id_user=ids)
-        username_profile_list.append(profile_lists)
-    suggestions_username_profile_list =list(chain(*username_profile_list))
+    # for ids in username_profile:
+    #     profile_lists =Profile.objects.filter(id_user=ids)
+    #     username_profile_list.append(profile_lists)
+        
+    # suggestions_username_profile_list =list(chain(*username_profile_list))
     
+     # ✅ NEW: directly use ForeignKey `user` to fetch Profile
+    suggestions_username_profile_list = [
+        # Profile.objects.get(user=user) for user in final_suggestions_list
+        Profile.objects.get_or_create(user=user)[0] for user in final_suggestions_list
+    ]
     
     # posts = Post.objects.all()
     return render(request, 'index.html', {'user_profile': user_profile, 'posts' : feed_list, 'suggestions_username_profile_list': suggestions_username_profile_list[:3]})
@@ -95,7 +124,8 @@ def signup(request):
                 
                 #create a Profile page for new user
                 user_model = User.objects.get(username=username)
-                new_profile = Profile.objects.create(user=user_model, id_user= user_model.id)
+                # new_profile = Profile.objects.create(user=user_model, id_user= user_model.id)
+                new_profile = Profile.objects.create(user=user_model)  # id_user no longer exists
                 new_profile.save()
                 return redirect('settings')
         else:  
@@ -163,21 +193,38 @@ def settings(request):
 @login_required(login_url='signin')
 def profile(request, pk):
     user_object = User.objects.get(username=pk)
-    user_profile = Profile.objects.get(user=user_object)
-    user_posts = Post.objects.filter(user=pk)
+    # ❌ Old (crashes if profile not found)
+    # user_profile = Profile.objects.get(user=user_object)
+    user_profile, _ = Profile.objects.get_or_create(user=user_object)
+
+
+
+    # ✅ New (creates a profile automatically if it doesn't exist)
+    user_profile, _ = Profile.objects.get_or_create(user=user_object)  # ✅ FIXED: prevent DoesNotExist crash
+
+    # ❌ OLD: filtered user_posts by string username
+    # user_posts = Post.objects.filter(user=pk)
+
+    # ✅ NEW: filter by User object
+    user_posts = Post.objects.filter(user=user_object)
     user_post_length=len(user_posts)
     
-    follower = request.user.username
-    user =pk 
+    # follower = request.user.username
+    # user =pk 
+    follower = request.user
+    user = user_object
     
-    if FollowersCount.objects.filter(follower= follower, user=user).first():
+    # if FollowersCount.objects.filter(follower= follower, user=user).first():
+    if FollowersCount.objects.filter(follower=follower, user=user).exists():
         button_text = 'Unfollow'
     else:
         button_text = 'Follow'
         
-    user_followers = len(FollowersCount.objects.filter(user=pk))
-    user_following = len(FollowersCount.objects.filter(follower=pk))
-        
+    # user_followers = len(FollowersCount.objects.filter(user=pk))
+    # user_following = len(FollowersCount.objects.filter(follower=pk))
+    user_followers = FollowersCount.objects.filter(user=user).count()
+    user_following = FollowersCount.objects.filter(follower=user).count()
+   
     
     context= {
         'user_object' : user_object,
@@ -195,17 +242,28 @@ def profile(request, pk):
 @login_required(login_url='signin')
 def follow(request):
     if request.method == 'POST':
-        follower = request.POST['follower']
-        user = request.POST['user']
+        # ❌ OLD: used usernames in FollowersCount
+        # follower = request.POST['follower']
+        # user = request.POST['user']
         
-        if FollowersCount.objects.filter(follower=follower, user=user).first():
-            delete_follower =  FollowersCount.objects.get(follower=follower, user=user)
-            delete_follower.delete()
-            return redirect('/profile/'+user)
+        # if FollowersCount.objects.filter(follower=follower, user=user).first():
+        #     delete_follower =  FollowersCount.objects.get(follower=follower, user=user)
+        #     delete_follower.delete()
+        #     return redirect('/profile/'+user)
+        # else:
+        #     new_follower=FollowersCount.objects.create(follower=follower, user=user)
+        #     new_follower.save()
+        #     return redirect('/profile/'+user)
+         # ✅ NEW: use User objects directly
+        follower = request.user
+        user = User.objects.get(username=request.POST['user'])
+
+        if FollowersCount.objects.filter(follower=follower, user=user).exists():
+            FollowersCount.objects.get(follower=follower, user=user).delete()
         else:
-            new_follower=FollowersCount.objects.create(follower=follower, user=user)
-            new_follower.save()
-            return redirect('/profile/'+user)
+            FollowersCount.objects.create(follower=follower, user=user)
+
+        return redirect('/profile/' + user.username)
             
     else:
         return redirect('/')
@@ -216,7 +274,11 @@ def follow(request):
 def upload(request):
 
     if request.method =='POST':
-        user = request.user.username
+        # ❌ OLD: Post.user was a string field
+        # user = request.user.username
+
+        # ✅ NEW: Post.user is a ForeignKey to User
+        user = request.user
         image = request.FILES.get('image_upload')
         caption = request.POST['caption']
         
@@ -226,7 +288,7 @@ def upload(request):
         return redirect('/')
     else:
         return redirect('/')
-    return HttpResponse('<h1> UPload View </h1>')
+    # return HttpResponse('<h1> UPload View </h1>')
 
 @login_required
 def delete_post(request, post_id):
@@ -243,24 +305,39 @@ def delete_post(request, post_id):
 
 @login_required(login_url='signin')
 def like_post(request):
-    username = request.user.username
+ # ❌ OLD: LikePost used string username & post_id
+    # username = request.user.username
+    # post_id = request.GET.get('post_id')
+    # like_filter = LikePost.objects.filter(post_id=post_id, username=username).first()
+
+    # ✅ NEW: LikePost uses ForeignKey for both post and user
+    user = request.user
     post_id = request.GET.get('post_id')
-    
     post = Post.objects.get(id=post_id)
-    
-    like_filter = LikePost.objects.filter(post_id=post_id, username=username).first()
-    
-    if like_filter == None:
-        new_like = LikePost.objects.create(post_id=post_id, username=username)
-        new_like.save()
-        post.no_of_likes = post.no_of_likes+1
+
+    like_filter = LikePost.objects.filter(post=post, user=user).first()
+
+    # if like_filter == None:
+    #     new_like = LikePost.objects.create(post_id=post_id, username=username)
+    #     new_like.save()
+    #     post.no_of_likes = post.no_of_likes+1
+    #     post.save()
+    #     return redirect('/')
+    # else:
+    #     like_filter.delete()
+    #     post.no_of_likes = post.no_of_likes-1
+    #     post.save()
+    #     return redirect('/')
+    if like_filter is None:
+        LikePost.objects.create(post=post, user=user)
+        post.no_of_likes += 1
         post.save()
-        return redirect('/')
     else:
         like_filter.delete()
-        post.no_of_likes = post.no_of_likes-1
+        post.no_of_likes -= 1
         post.save()
-        return redirect('/')
+
+    return redirect('/')
         
 # COMMENTS
 @login_required(login_url='signin')
@@ -304,21 +381,30 @@ def edit_comment(request, comment_id):
 @login_required(login_url='signin')
 def search(request):
     user_object = User.objects.get(username=request.user.username)
-    user_profile = Profile.objects.get(user=user_object)
+    # user_profile = Profile.objects.get(user=user_object)
+    user_profile, _ = Profile.objects.get_or_create(user=user_object)  # ✅ creates profile if needed
+
 
     if request.method == 'POST':
         username = request.POST['username']
-        username_object = User.objects.filter(username__icontains=username)
+        username_objects = User.objects.filter(username__icontains=username)
 
-        username_profile = []
-        username_profile_list = []
+        # ❌ OLD: filtered Profile using id_user
+        # username_profile = []
+        # username_profile_list = []
+        # for users in username_objects:
+        #     username_profile.append(users.id)
+        # for ids in username_profile:
+        #     profile_lists = Profile.objects.filter(id_user=ids)
+        #     username_profile_list.append(profile_lists)
+        # username_profile_list = list(chain(*username_profile_list))
 
-        for users in username_object:
-            username_profile.append(users.id)
+        # ✅ NEW: get Profile directly using ForeignKey
+        username_profile_list = [Profile.objects.get(user=user) for user in username_objects]
 
-        for ids in username_profile:
-            profile_lists = Profile.objects.filter(id_user=ids)
-            username_profile_list.append(profile_lists)
-        
-        username_profile_list = list(chain(*username_profile_list))
-    return render(request, 'search.html', {'user_profile': user_profile, 'username_profile_list': username_profile_list})
+        return render(request, 'search.html', {
+            'user_profile': user_profile,
+            'username_profile_list': username_profile_list
+        })
+
+    return redirect('/')
