@@ -20,7 +20,23 @@
 </head>
 
 <body>
-
+{% if messages %}
+        {% for message in messages %}
+            <div 
+                class="text-white px-4 py-3 rounded mb-4 mx-auto text-center font-semibold max-w-xl
+                {% if message.tags == 'success' %}
+                    bg-green-500
+                {% elif message.tags == 'error' %}
+                    bg-red-500
+                {% elif message.tags == 'info' %}
+                    bg-blue-500
+                {% else %}
+                    bg-gray-500
+                {% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
 
     <header>
         <!-- Floating centered logo and home text -->

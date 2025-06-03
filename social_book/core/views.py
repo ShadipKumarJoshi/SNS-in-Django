@@ -176,6 +176,7 @@ def signup(request):
         user.save()
         auth.login(request, user)
         Profile.objects.get_or_create(user=user)
+        messages.success(request, 'Your account has been created successfully!')
         return redirect('settings')
     else:
         return render(request, 'signup.html')
@@ -190,6 +191,7 @@ def signin(request):
         
         if user is not None:
             auth.login(request, user)
+            messages.success(request, 'Welcome to your account!')
             return redirect('/')
         else:
             messages.info(request, ' Invalid credentials!')
@@ -205,7 +207,9 @@ def signin(request):
 @login_required(login_url='signin')
 def logout(request):
     auth.logout(request)
+    messages.success(request, 'You have successfully logged out!')
     return redirect('signin')
+
 
 @login_required(login_url='signin')
 def settings(request):
@@ -233,6 +237,7 @@ def settings(request):
         user_profile.bio = bio
         user_profile.location = location
         user_profile.save()
+        messages.success(request, 'You have successfully updated your profile!')
 
         return redirect('settings')
 
@@ -333,6 +338,7 @@ def upload(request):
         
         new_post = Post.objects.create(user=user, image=image, caption=caption)
         new_post.save()
+        messages.success(request, 'Your post is successfully made!')
         
         return redirect('/')
     else:
@@ -346,6 +352,7 @@ def delete_post(request, post_id):
     # Allow only the owner to delete the post
     if post.user == request.user:
         post.delete()
+        messages.success(request, 'Your post is successfully deleted!')
         
     return redirect('/') 
 
