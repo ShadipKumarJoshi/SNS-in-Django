@@ -39,7 +39,8 @@
 
                     <div class="capitalize flex font-semibold hidden lg:block my-2 space-x-3 text-center text-sm">
 
-                        <a href="/signin" class="bg-pink-500 pink-500 px-6 py-3 rounded-md shadow text-white hover:text-blue-500">Login</a>
+                        <a href="/signin"
+                            class="bg-pink-500 pink-500 px-6 py-3 rounded-md shadow text-white hover:text-blue-500">Login</a>
                     </div>
 
                 </div>
@@ -74,11 +75,11 @@
                         <input type="text" placeholder="First Name"  class="bg-gray-200 mb-2 shadow-none  dark:bg-gray-800" style="border: 1px solid #d3d5d8 !important;">
                         <input type="text" placeholder="Last Name" class="bg-gray-200 mb-2 shadow-none  dark:bg-gray-800" style="border: 1px solid #d3d5d8 !important;">
                     </div>-->
-                    <input type="text" name="username" placeholder="Username"
-                        class="bg-gray-200 mb-2 shadow-none  dark:bg-gray-800"
+                    <input type="text" name="username" placeholder="Username" value="{{ username }}"
+                        class="bg-gray-200 mb-2 shadow-none dark:bg-gray-800"
                         style="border: 1px solid #d3d5d8 !important;">
-                    <input type="email" name="email" placeholder="Email"
-                        class="bg-gray-200 mb-2 shadow-none  dark:bg-gray-800"
+                    <input type="email" name="email" placeholder="Email" value="{{ email }}"
+                        class="bg-gray-200 mb-2 shadow-none dark:bg-gray-800"
                         style="border: 1px solid #d3d5d8 !important;">
                     <input type="password" name="password" placeholder="Password"
                         class="bg-gray-200 mb-2 shadow-none  dark:bg-gray-800"
@@ -97,7 +98,8 @@
                         class="bg-gradient-to-br from-pink-500 py-3 rounded-md text-white text-xl to-red-400 w-full">Sign
                         Up</button>
                     <div class="text-center mt-5 space-x-2">
-                        <p class="text-base"> Do you have an account? <a href="/signin" class="text-blue-500 hover:underline hover:text-blue-700"> Login here</a></p>
+                        <p class="text-base"> Do you have an account? <a href="/signin"
+                                class="text-blue-500 hover:underline hover:text-blue-700"> Login here</a></p>
                     </div>
                 </form>
             </div>

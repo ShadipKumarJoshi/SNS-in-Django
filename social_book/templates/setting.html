@@ -18,6 +18,41 @@
 </head>
 
 <body>
+     <!-- ✅ Add the alert message block here -->
+    {% if messages %}
+        {% for message in messages %}
+            <div 
+                class="text-white px-4 py-3 rounded mb-4 mx-auto text-center font-semibold max-w-xl
+                {% if message.tags == 'success' %}
+                    bg-green-500
+                {% elif message.tags == 'error' %}
+                    bg-red-500
+                {% elif message.tags == 'info' %}
+                    bg-blue-500
+                {% else %}
+                    bg-gray-500
+                {% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+    	<!-- Floating centered logo and home text -->
+		<div style="
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+">
+			<a href="{% url 'index' %}"
+				style="text-decoration: none; color: inherit; display: flex; align-items: center;">
+				<img src="{% static 'images/logo.png' %}" alt="Logo"
+					style="height: 50px; width: 50px; border-radius: 50%; object-fit: cover;">
+				<span style="font-size: 20px; font-weight: bold; margin-left: 10px;">Home</span>
+			</a>
+		</div>
 
 
 
