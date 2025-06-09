@@ -105,9 +105,7 @@
                   </div>
                 </form>
 
-                <!--  <a href="#" class="uk-text-muted mt-3 uk-link"
-                                    uk-toggle="target: .choose-upload ;  animation: uk-animation-slide-right-small, uk-animation-slide-left-medium; queued: true">
-                                    Or Import Video </a>  -->
+               
               </div>
 
               <div class="uk-flex uk-flex-column choose-upload" hidden>
@@ -143,8 +141,7 @@
               <li>
                 <a href="/settings">Account setting</a>
               </li>
-              <!--  <li><a href="explore.html">explore </a> </li>
-                                <li><a href="#"> Help </a> </li>  -->
+              
               <li>
                 <a href="logout">Log Out</a>
               </li>
@@ -170,8 +167,7 @@
                       <img src="{{ post.user_profile.profileimg.url }}" class="bg-gray-200 border border-white rounded-full w-8 h-8" />
                     </div>
                   </a>
-                  <!--  <span class="block capitalize font-semibold "> <a href="/profile/{{post.user}}">
-                                    @{{post.user}}</a> </span>  -->
+                 
                   <span class="block capitalize font-semibold"><a href="/profile/{{ post.user.username }}">@{{ post.user.username }}</a></span> <!-- user is now a ForeignKey object -->
                 </div>
 

@@ -64,15 +64,7 @@
         <h1 class="text-2xl leading-none text-gray-900 tracking-tight mt-3"> <a href="/">Home/</a> Account Setting for
             <b>{{user.username}}</b>
         </h1>
-        <!-- <ul class="mt-5 -mr-3 flex-nowrap lg:overflow-hidden overflow-x-scroll uk-tab">
-            <li class="uk-active"><a href="#">General</a></li>
-            <li><a href="#">Profile</a></li>
-            <li><a href="#">Privacy</a></li>
-            <li><a href="#">Notification</a></li>
-            <li><a href="#">Social links</a></li>
-            <li><a href="#">Billing</a></li>
-            <li><a href="#">Security</a></li>
-        </ul> -->
+       
 
         <br>
         <hr>
@@ -84,11 +76,7 @@
             </div>
             <div class="bg-white rounded-md lg:shadow-lg shadow col-span-2">
 
-                <!-- action="" Submits the form to the same URL as the current page.
-                method="POST" Sends form data via the POST method — required when changing or creating data.
-                enctype="multipart/form-data" This is essential for uploading files (like images). Without it, file data won’t be sent properly.
-                -->
-
+               
                 <form action="" method="POST" enctype="multipart/form-data">
                     {% csrf_token %}
 
@@ -111,18 +99,7 @@
                             {% endif %}
                             <input type="file" name="coverimg" class="shadow-none bg-gray-100">
                         </div>
-                        <!-- <div>
-                        <label for=""> First name</label>
-                        <input type="text" placeholder="Your name.." class="shadow-none bg-gray-100">
-                    </div>
-                    <div>
-                        <label for=""> Last name</label>
-                        <input type="text" placeholder="Your name.." class="shadow-none bg-gray-100">
-                    </div>
-                    <div class="col-span-2">
-                        <label for=""> Email</label>
-                        <input type="text" placeholder="Your name.." class="shadow-none bg-gray-100">
-                    </div> -->
+                        
                         <div class="col-span-2">
                             <label for="bio">Bio</label>
                             <textarea id="bio" name="bio" rows="3"
