@@ -120,7 +120,7 @@ def signin(request):
         
         user = auth.authenticate(username=username, password=password)
         
-        if user is not None:
+        if user:
             auth.login(request, user) # creates a session for the user
             messages.success(request, 'Welcome to your account!')
             return redirect('/')
