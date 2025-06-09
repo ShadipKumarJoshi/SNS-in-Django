@@ -176,7 +176,8 @@ def settings(request):
 @login_required(login_url='signin')
 def profile(request, pk):
     user_object = User.objects.get(username=pk)
-    user_profile= Profile.objects.get(user=user_object)
+    user_profile, _ = Profile.objects.get_or_create(user=user_object)
+    user_profile, _ = Profile.objects.get_or_create(user=user_object)  # ✅ FIXED: prevent DoesNotExist crash
 
        # ✅ NEW: filter by User object
     user_posts = Post.objects.filter(user=user_object)
