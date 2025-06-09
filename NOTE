@@ -6,3 +6,15 @@ email: admin@gmail.com
 id: test1
 pass: testtest
 email: test1@gmail.com
+
+
+QUESTIONS
+
+primary key,
+uuid,
+modal > id not in user but in post
+If you don’t specify an id, Django automatically adds
+id = models.AutoField(primary_key=True)
+
+
+textfield vs charfield

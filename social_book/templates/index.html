@@ -7,10 +7,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="% static 'favicon.png' %" rel="icon" type="image/png">
+    <link href="{% static 'favicon.png' %}" rel="icon" type="image/png">
     <title>Home</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
     <link rel="stylesheet" href="{% static 'assets/css/icons.css' %}">
     <link rel="stylesheet" href="{% static 'assets/css/uikit.css' %}">
     <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
@@ -57,7 +56,7 @@
 </div>
 
         <div class="header_inner">
-            <form action="/search" method="POST">
+            <form action="{% url 'search' %}" method="POST">
                 
                 {% csrf_token %}
 
@@ -71,16 +70,12 @@
                         </a>
                     </div>
 
-                    <!--<div class="triger" uk-toggle="target: #wrapper ; cls: sidebar-active">
-                        <i class="uil-bars"></i>
-                    </div>-->
-
-                    <!-- <div class="header_search"> -->
+                    
                     <input type="text" name="username" placeholder="Search for username..">&nbsp; &nbsp;
                     <button type="submit"> <i class="fa fa-search fa-1x"></i>
 
                     </button>
-                    <!-- </div> -->
+                    
 
                 </div>
             </form>
@@ -171,77 +166,7 @@
                     </div>
                 </div>
 
-                <!-- Notification -->
-
-                <!-- <a href="#" class="header-links-item">
-                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-                        aria-hidden="true" role="img" width="1em" height="1em" preserveAspectRatio="xMidYMid meet"
-                        viewBox="0 0 24 24">
-                        <g fill="none">
-                            <path
-                                d="M12 22a2.02 2.02 0 0 1-2.01-2h4a2.02 2.02 0 0 1-.15.78a2.042 2.042 0 0 1-1.44 1.18h-.047A1.922 1.922 0 0 1 12 22zm8-3H4v-2l2-1v-5.5a8.065 8.065 0 0 1 .924-4.06A4.654 4.654 0 0 1 10 4.18V2h4v2.18c2.579.614 4 2.858 4 6.32V16l2 1v2z"
-                                fill="currentColor" />
-                        </g>
-                    </svg>
-                </a>
-                <div uk-drop="mode: click;offset: 4" class="header_dropdown">
-                    <h4 class="-mt-5 -mx-5 bg-gradient-to-t from-gray-100 to-gray-50 border-b font-bold px-6 py-3">
-                        Notification </h4>
-                    <ul class="dropdown_scrollbar" data-simplebar>
-                        <li>
-                            <a href="#">
-                                <div class="drop_avatar"> <img src="{% static 'assets/images/avatars/avatar-1.jpg' %}"
-                                        alt="">
-                                </div>
-                                <div class="drop_content">
-                                    <p> <strong class="text-link">Taiye</strong>
-                                        <span class="text-link"> is following you </span>
-                                    </p>
-                                    <span class="time-ago"> 2 hours ago </span>
-                                </div>
-                            </a>
-                        </li>
-
-
-                    </ul>
-                    <a href="#" class="see-all">See all</a>
-                </div> -->
-
-                <!-- Messages -->
-
-                <!-- <a href="#" class="header-links-item">
-                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-                        aria-hidden="true" role="img" width="0.5em" height="0.5em" preserveAspectRatio="xMidYMid meet"
-                        viewBox="0 0 16 16">
-                        <g fill="currentColor">
-                            <path
-                                d="M2 0a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2.5a1 1 0 0 1 .8.4l1.9 2.533a1 1 0 0 0 1.6 0l1.9-2.533a1 1 0 0 1 .8-.4H14a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z" />
-                        </g>
-                    </svg>
-                </a>
-                <div uk-drop="mode: click;offset: 4" class="header_dropdown">
-                    <h4 class="-mt-5 -mx-5 bg-gradient-to-t from-gray-100 to-gray-50 border-b font-bold px-6 py-3">
-                        Messages </h4>
-                    <ul class="dropdown_scrollbar" data-simplebar>
-                        <li>
-                            <a href="#">
-                                <div class="drop_avatar"> <img src="{% static 'assets/images/avatars/avatar-1.jpg' %}"
-                                        alt="">
-                                </div>
-                                <div class="drop_content">
-                                    <strong> Taiye </strong> <time> 6:43 PM</time>
-                                    <p> hi tomi </p>
-                                </div>
-                            </a>
-                        </li>
-
-
-
-                    </ul>
-                    <a href="#" class="see-all">See all</a>
-                </div> -->
-
-                <!-- profile image -->
+                
 
                 <a href="#">
                     <img src="{{user_profile.profileimg.url}}" class="header-avatar" alt="">
@@ -262,7 +187,6 @@
 
     <div class="container m-auto">
 
-        <!--<h1 class="lg:text-2xl text-lg font-extrabold leading-none text-gray-900 tracking-tight mb-5"> Feed </h1>--->
 
         <div class="lg:flex justify-center lg:space-x-10 lg:space-y-0 space-y-5">
 
@@ -333,28 +257,22 @@
                         </p>
 
                         <div class="flex space-x-4 lg:font-bold">
-                            <a href="/like-post?post_id={{post.id}}" class="flex items-center space-x-2">
-                                <div class="p-2 rounded-full text-black">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
-                                        width="25" height="25" class="">
-                                        <path
-                                            d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z" />
-                                    </svg>
-                                    <p>{{post.no_of_likes}} Likes</p>
-                                </div>
+                            <form method="POST" action="{% url 'like-post' %}">
+    {% csrf_token %}
+    <input type="hidden" name="post_id" value="{{ post.id }}">
+    <button type="submit" class="flex items-center space-x-2">
+        <div class="p-2 rounded-full text-black">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+                width="25" height="25">
+                <path
+                    d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z" />
+            </svg>
+            <p>{{ post.no_of_likes }} Likes</p>
+        </div>
+    </button>
+</form>
 
-                            </a>
-                            <!-- <a href="#" class="flex items-center space-x-2">
-                                <div class="p-2 rounded-full text-black">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
-                                        width="25" height="25" class="">
-                                        <path fill-rule="evenodd"
-                                            d="M18 5v8a2 2 0 01-2 2h-5l-5 4v-4H4a2 2 0 01-2-2V5a2 2 0 012-2h12a2 2 0 012 2zM7 8H5v2h2V8zm2 0h2v2H9V8zm6 0h-2v2h2V8z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-
-                            </a> -->
+                            
                             <a href="{{post.image.url}}" class="flex items-center space-x-2 flex-1 justify-end"
                                 download>
                                 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -484,9 +402,9 @@
                                     <img src="{{suggestion.profileimg.url}}" class="bg-gray-200 rounded-full w-10 h-10">
                                 </a>
                                 <div class="flex flex-col">
-                                    <!-- <span class="block capitalize font-semibold"> {{suggestion.user}} </span> -->
+                                    
                                      <span class="block capitalize font-semibold"> {{suggestion.user.username}} </span> <!-- ForeignKey -->
-                                    <!-- <span class="block capitalize text-sm"> 320k followers </span> -->
+                                    
                                 </div>
                             </div>
 
