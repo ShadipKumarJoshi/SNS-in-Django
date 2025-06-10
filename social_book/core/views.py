@@ -5,64 +5,74 @@ from .models import Profile, Post, LikePost, FollowersCount, Comment
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from itertools import chain
+from django.db.models import Prefetch
 import random
 
 # HOME FEED
 # Create your views here.
+from django.shortcuts import render, redirect
+from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from .models import Profile, Post, LikePost, FollowersCount, Comment
+from django.db.models import Prefetch
+from itertools import chain
+import random
+
 @login_required(login_url='signin')
 def index(request):
-    user_object = User.objects.get(username=request.user.username)
-    user_profile, _ = Profile.objects.get_or_create(user=user_object)  # ✅ creates profile if needed
-    
-    # Get usernames the user follows
-    user_following_list =[]
-    feed = []
-    
-  
-    user_following = FollowersCount.objects.filter(follower=request.user)
+    user_profile = Profile.objects.get(user=request.user) # Ensure profile exists for the current user
+    user_following = FollowersCount.objects.filter(follower=request.user).values_list('user', flat=True) # Users the current user is following
 
-    for users in user_following:
-        user_following_list.append(users.user)
-    
-    # Fetch posts of followed users    
-    for usernames in user_following_list:
-        feed_lists = Post.objects.filter(user=usernames)
-        feed.append(feed_lists)
-    
-    my_posts = Post.objects.filter(user=request.user)
-    feed.append(my_posts)
-    
-    # Merge all post querysets into a single list    
-    feed_list = list(chain(*feed))
-    
-    # Enrich posts with profile and comments
-    for post in feed_list:
-        post.user_profile, _ = Profile.objects.get_or_create(user=post.user)  # ✅ creates profile if missing
-   
-        post.comments = Comment.objects.filter(post=post).order_by('-created_at')
+    # Posts from followed users and the current user
+    posts = Post.objects.filter(user__in=list(user_following) + [request.user]).select_related('user').order_by('-created_at')
 
-        # Attach commenter profile to each comment
-        for comment in post.comments:
-            comment.profile, _ = Profile.objects.get_or_create(user=comment.user)
+    # Prefetch related comments and comment.user in one go
+    posts = posts.prefetch_related(
+        Prefetch('comment_set', queryset=Comment.objects.select_related('user').order_by('-created_at'))
+    )
 
-        
-    # user suggestion starts
-    all_users = User.objects.filter(is_superuser=False, is_staff=False)
+    # Attach profiles to posts and comments
+    for post in posts:
+        post.user_profile = Profile.objects.get(user=post.user)
 
-    user_following_all = []
-    
-    for user in user_following:
-        user_list = user.user
-        user_following_all.append(user_list)
-    
-    new_suggestions_list = [x for x in list(all_users) if (x not in list(user_following_all))]
-    final_suggestions_list = [x for x in new_suggestions_list if x != request.user]
-    random.shuffle(final_suggestions_list)
-    suggestions_username_profile_list = [
-        Profile.objects.get_or_create(user=user)[0] for user in final_suggestions_list
-    ]
-    
-    return render(request, 'index.html', {'user_profile': user_profile, 'posts' : feed_list, 'suggestions_username_profile_list': suggestions_username_profile_list[:3]})
+        for comment in post.comment_set.all():
+            comment.profile = Profile.objects.get(user=comment.user)
+
+    # Suggest users to follow
+    all_users = User.objects.filter(is_superuser=False, is_staff=False).exclude(id=request.user.id)
+    following_users = set(user_following)
+    suggestions = [user for user in all_users if user.id not in following_users]
+
+    random.shuffle(suggestions)
+    suggestions_profiles = [Profile.objects.get(user=user)for user in suggestions[:3]]
+
+    context = {
+        'user_profile': user_profile,
+        'posts': posts,
+        'suggestions_username_profile_list': suggestions_profiles,
+    }
+
+    return render(request, 'index.html', context)
+def validate_signup_data(username, email, password, password2):
+    errors = []
+
+    if not username or not email or not password or not password2:
+        errors.append("All fields are required.")
+
+    if len(password) < 6:
+        errors.append("Password must be at least 6 characters long.")
+
+    if password != password2:
+        errors.append("Passwords do not match!")
+
+    if User.objects.filter(email=email).exists():
+        errors.append("Email is already registered!")
+
+    if User.objects.filter(username=username).exists():
+        errors.append("Username is already registered!")
+
+    return errors
 
 def signup(request):
     if request.method == "POST":
@@ -77,36 +87,18 @@ def signup(request):
             'email': email
         }
         
-         # ✅ NEW: Check for empty fields
-        if not username or not email or not password or not password2:
-            messages.error(request, 'All fields are required.')
-            return render(request, 'signup.html', context)
+        # Use helper function for error
+        errors = validate_signup_data(username, email, password, password2)
 
-        # ✅ NEW: Enforce password strength
-        if len(password) < 6:
-            messages.error(request, 'Password must be at least 6 characters long.')
-            return render(request, 'signup.html', context)
-        
-        # ✅ NEW: Validate password match
-        if password != password2:
-            messages.error(request, 'Passwords do not match!')
-            return render(request, 'signup.html', context)
-
-        # ✅ NEW: Check for existing email
-        if User.objects.filter(email=email).exists():
-            messages.error(request, 'Email is already registered!')
-            return render(request, 'signup.html', context)
-
-        # ✅ NEW: Check for existing username
-        if User.objects.filter(username=username).exists():
-            messages.error(request, 'Username is already registered!')
+        if errors:
+            for error in errors:
+                messages.error(request, error)
             return render(request, 'signup.html', context)
 
         # ✅ NEW: Create and login user, create profile
         user = User.objects.create_user(username=username, email=email, password=password)
-        user.save()
+        Profile.objects.create(user=user)
         auth.login(request, user)
-        Profile.objects.get_or_create(user=user)
         messages.success(request, 'Your account has been created successfully!')
         return redirect('settings')
     else:
@@ -315,7 +307,7 @@ def edit_comment(request, comment_id):
 @login_required(login_url='signin')
 def search(request):
     user_object = User.objects.get(username=request.user.username)
-    user_profile, _ = Profile.objects.get_or_create(user=user_object)  # ✅ creates profile if needed
+    user_profile, _ = Profile.objects.get(user=user_object)  #
 
 
     if request.method == 'POST':
